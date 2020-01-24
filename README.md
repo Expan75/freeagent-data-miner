@@ -20,4 +20,11 @@ This project aims to serve as a project where multiple data science skills are d
 
 This is very much a work in progress, and as I am (and should be moreso) writing my dissertation, I cannot rush to finish all the parts. That said, regardless of stage of completion, it should still serve as an indicator of skill.
 
+Feel free to check out my trello board for the current progress!
+<a href=https://trello.com/b/6p3eXTX2/freeagent-data-mining-project>https://trello.com/b/6p3eXTX2/freeagent-data-mining-project </a>
+
 Hope you like it :)
+
+Best regards,
+
+Erik
