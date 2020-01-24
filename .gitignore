@@ -1,0 +1,11 @@
+
+# Binaries
+.Python
+
+# Env
+bin/
+include/
+lib/
+
+# data
+reviews.csv
