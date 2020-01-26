@@ -7,21 +7,24 @@ from bs4 import BeautifulSoup
 from requests import get
 import pandas as pd
 
-# Setup request/res object
-# url = 'https://uk.trustpilot.com/review/www.freeagent.com?page=%s' % 1 
-# res = get(url)
-# html_soup = BeautifulSoup(res.text, 'html.parser')
+BASE_URL = 'https://www.softwareadvice.com/accounting/freeagent-profile/reviews/'
+# https://www.softwareadvice.com/accounting/freeagent-profile/reviews/?review.page=1
 
-BASE_URL = 'https://uk.trustpilot.com/review/www.freeagent.com'
+# If exceding pagination, will direct to last page of results
+
 
 # NOTE: this does not check for repeat data or redirects to home page
 def initDataFlow(paginatedLimit):
+    """ Inits Data flow via function calls while keeping track of progress to ensure no data duplication """ 
+
+    # Useful vars for control flow 
     paginatedLimit += 1
     cachedContent = None
+    cachedNResults = None
 
     for n in range(1, paginatedLimit):
 
-        url = BASE_URL + '?page=' + str(n)
+        url = BASE_URL + '?review.page=' + str(n)
         res = getPageRes(url)
 
         # Handle 404's 
@@ -35,15 +38,21 @@ def initDataFlow(paginatedLimit):
         # Handle redirect to frontpage when overstepping pagination (cache the first content)
         if data[0]['content'] == cachedContent:
             break
-
+    
         # Save objects in CSV
         saveObjects(data)
 
-        # only Cache first result (used by error handler)
+        # Handles redirect
+        if len(data) < cachedNResults:
+            break
+
         if n==1:
+            # Setups condition to prevent duplication if redirected to first page
             cachedContent = data[0]['content']
+            # Setup condition to prevent duplication if redirected to last page
+            # NOTE: DOESNT cover edge case were last page has exactly paginated Max
+            cachedNResults = len(data[0])
     
-    """ Data flow finished """
     return
         
 
@@ -94,7 +103,7 @@ def assembleReviewObjects(scores, titles, contents):
 
 def saveObjects(objects):
     """ Takes in a list of review objects """
-    pd.DataFrame(objects).to_csv('reviews.csv', mode='a', header=False, index=False, index_label=False)
+    pd.DataFrame(objects).to_csv('softwareadvice.csv', mode='a', header=False, index=False, index_label=False)
     print("wrote " + str(len(objects)) + " reviews to file.")
 
 
@@ -104,4 +113,4 @@ def saveObjects(objects):
 # data = assembleReviewObjects(scores,titles,contents)
 # saveObjects(data)
 
-initDataFlow(100)
+initDataFlow(4)
