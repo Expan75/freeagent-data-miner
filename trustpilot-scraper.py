@@ -94,7 +94,7 @@ def assembleReviewObjects(scores, titles, contents):
 
 def saveObjects(objects):
     """ Takes in a list of review objects """
-    pd.DataFrame(objects).to_csv('reviews.csv', mode='a', header=False, index=False, index_label=False)
+    pd.DataFrame(objects).to_csv('data/trustpilot-reviews.csv', mode='a', header=False, index=False, index_label=False)
     print("wrote " + str(len(objects)) + " reviews to file.")
 
 

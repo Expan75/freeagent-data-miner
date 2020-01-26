@@ -109,7 +109,7 @@ def initDataFlow(maxPageLimit):
     nReviewsSaved = 0
 
     for page_index in range(1, maxPageLimit+1):
-        print("loop Iteration %s" %page_index)
+        # print("loop Iteration %s" %page_index)
         # construct specific page url and get a soup object for the served HTML doc
         soup = getSoup(getPageRes(BASE_URL+'?review.page='+str(page_index)))
 
@@ -120,9 +120,9 @@ def initDataFlow(maxPageLimit):
         # constructs a list of review objects
         reviews = constructReviewObjects(scores, titles, contents)
 
-        print("printing CachedContent: %s" %cachedContent)
+        # print("printing CachedContent: %s" %cachedContent)
         # check cache if repeating content
-        print("printing reviews[0]: %s" %reviews[0])
+        # print("printing reviews[0]: %s" %reviews[0])
         if reviews[0] == cachedContent:
             break
 
@@ -131,7 +131,7 @@ def initDataFlow(maxPageLimit):
             cachedContent = reviews[0]
 
         # and writes them to csv
-        nReviewsSaved += saveObjects(reviews, "sw-advice-reviews.csv")
+        nReviewsSaved += saveObjects(reviews, "data/sw-advice-reviews.csv")
     
     print("dataflow ended gracefully with %s saved results." %nReviewsSaved)
     return
