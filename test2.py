@@ -11,69 +11,91 @@ BASE_URL = 'https://www.softwareadvice.com/accounting/freeagent-profile/reviews/
 # https://www.softwareadvice.com/accounting/freeagent-profile/reviews/?review.page=1
 
 """
+
 TODO: 
         1. Rewrite scrape rules (allow for fusing pros & cons section)
                 - if n of results < than last n results => probably final page
         2. Handle redirect to last result
+
 """
 
 def getPageRes(url):
     """ takes in a string URL a returns a requests response object """
     return get(url)
 
-
 def getSoup(res):
     """ takes in a requests res object and returns a beautiful soup HTML object """
     return BeautifulSoup(res.text, 'html.parser')
 
 
+def getReviewScores(soup):
+    """ takes in a soup object and extracts all the reviewScores, returns a list of strings """
+    reviewScores = soup.find_all('div', class_=re.compile(r'new-stars-rank__'))
+    return list(map(lambda tagComponents: tagComponents['class'][-1], reviewScores))
 
-soup = getSoup(getPageRes(BASE_URL+'?review.page='+str(1)))
 
-# # Should not include first result as this is merely the page summary
-# reviewScores = soup.find_all('div', class_=re.compile(r'new-stars-rank__')) 
-# # print(reviewScores[1]['class'][-1])
+def getReviewTitles(soup):
+    """ takes in a soup object and extracts all the reviewTitles, returns a list of strings """
+    extractedTitlesText = soup.find_all('p', class_='review-copy-header strong')
+    return list(map(lambda tagComponenets: tagComponenets.text, extractedTitlesText))
 
-# # returns all the objects containing the review titles
-# reviewTitles = soup.find_all('p', class_='review-copy-header strong')
 
-# print(reviewTitles[0].text)
+def getReviewContents(soup):
+    """ takes in a soup object and extracts all the review contents, returns a list of strings"""
+    reviewContainerDivs = soup.find_all('div', class_='review-copy-container')
+    
+    # gets all p-tags stored in reviews
+    reviewContainerPtags = list(map(lambda x: x.find_all('p', class_='ui'), reviewContainerDivs))
 
-# gets all review containers
-reviewContainerDivs = soup.find_all('div', class_='review-copy-container')
+    return extractReviewContents(reviewContainerPtags)
 
-# gets all p-tags stored in reviews
-reviewContainerPtags = list(map(lambda x: x.find_all('p', class_='ui'), reviewContainerDivs))
 
-def extractReviewObjects(listOfContainersPtags):
-    """ takes a list of lists (containerPtags) and returns a list of review objects """
+def extractReviewContents(listOfContainersPtags):
+    """ takes a list of lists (containerPtags) and returns a list of review contents """
 
-    reviewObjects = []
-    for setOfPtags in reviewContainerPtags:
+    reviewContents = []
+    for setOfPtags in listOfContainersPtags:
         extractedPtext = list(map(lambda x: x.text, setOfPtags))
 
         # Handle missing info by simply subbing review info for empty string
         if len(extractedPtext) < 4:
-            reviewObject = {
-                "review" : "" 
-            }
+            reviewContents.append("")
         else:
-            # go backwards to ensure we don't get the review summary, only pros & cons if they exist
-            reviewObject = {
-                "review" : extractedPtext[-3] + extractedPtext[-1] 
-            }
+            content = extractedPtext[-3] + extractedPtext[-1] 
+            reviewContents.append(content)
 
-        reviewObjects.append(reviewObject)
+    return reviewContents
+
+def constructReviewObjects(scores, titles, contents):
+
+    reviewObjects = []
+    for index, content in enumerate(contents, 0):
+        review = {
+            "score": scores[index],
+            "title": titles[index],
+            "content": content
+        }
+        reviewObjects.append(review)
+
     return reviewObjects
 
+# just double checkin
+soup = getSoup(getPageRes(BASE_URL+'?review.page='+str(1)))
+
+scores      = getReviewScores(soup)
+titles      = getReviewTitles(soup)
+contents    = getReviewContents(soup)
+
+reviews = constructReviewObjects(scores, titles, contents)
 
 
+def printNfirstObjects(n, objects):
+    """ outputs the first n (int input) objects in a given list of objects; returns nothing """
+    listOfObjects = constructReviewObjects(scores, titles, contents)
+    for obj in listOfObjects[:n]:
+        print("")
+        print(obj)
+        print("")
+    return "Output done! printed: %s objects" %n 
 
-data = extractReviewObjects(reviewContainerPtags)
-# extracts all the text between p-tags while excluding pros & cons labels
-for reviewObject in data:
-    print("")
-    print(reviewObject)
-    if len(reviewObject['review']) == 0:
-        break
-    print("")
+printNfirstObjects(15, reviews)
