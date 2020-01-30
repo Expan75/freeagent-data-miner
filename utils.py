@@ -17,9 +17,12 @@ def getPageRes(url):
     return get(url)
     
 
-def getSoup(res):
+def getSoup(res, usingDriver=False):
     """ takes in a requests res object and returns a beautiful soup HTML object """
-    return BeautifulSoup(res.text, 'html.parser')
+    if usingDriver == True:
+        return BeautifulSoup(res, 'html.parser')
+    else:
+        return BeautifulSoup(res.text, 'html.parser')
 
 
 def saveObjects(objects, path):
