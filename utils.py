@@ -18,7 +18,7 @@ def getPageRes(url):
     
 
 def getSoup(res, usingDriver=False):
-    """ takes in a requests res object and returns a beautiful soup HTML object """
+    """ takes in a requests res object OR a webdriver object and returns a beautiful soup HTML object """
     if usingDriver == True:
         return BeautifulSoup(res, 'html.parser')
     else:

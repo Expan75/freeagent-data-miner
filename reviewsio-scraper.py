@@ -1,6 +1,7 @@
 # standard package general imports
-import re
 import csv
+import re
+import json
 
 # standard package specific imports
 from time import sleep
@@ -12,41 +13,11 @@ import pandas as pd
 # Relative Imports (util functions)
 from utils import getPageRes, getSoup, saveObjects
 
-# Selinum Imports
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-
 # CONSTS
 BASE_URL = 'https://www.reviews.co.uk/company-reviews/store/freeagent'
 # example of page 2
-# https://www.reviews.co.uk/company-reviews/store/freeagent/1
-WEB_DRIVER_PATH = '/Users/Erik/downloads/chromedriver'
 
-# # Init Selenium Object /w headless
-# options = Options()
-# options.add_argument('--headless')
-# options.add_argument('--disable-gpu')  # Last I checked this was necessary.
-# driver = webdriver.Chrome(WEB_DRIVER_PATH, options=options)
-
-# # Navigates to results
-# driver.get('https://www.reviews.co.uk/company-reviews/store/freeagent')
-
-# # Waits until review text is rendered
-# try:
-#     myElem = WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.CLASS_NAME, 'Review__quotationMark')))
-#     print("Page is ready!")
-# except TimeoutException:
-#     print("Loading took too much time!")
-
-# # Run scraping functions on now rendered page
-
-# soup = getSoup(driver.page_source, usingDriver=True)
-
-
-
+# # https://www.reviews.co.uk/company-reviews/store/freeagent/1
 
 def getRatingDivs(soup):
     """ takes in a soup object and returns all the reviews' rating divs """
@@ -80,9 +51,6 @@ def getRatings(ratingDivs):
     return numericalRatings
 
 
-res = getSoup(BASE_URL, usingDriver=True)
-soup = BeautifulSoup(res)
-
 def getReviewText(soup):
 
     # Text is actually wrapped inside a script tag as JSON data
@@ -90,9 +58,50 @@ def getReviewText(soup):
     print(data)
     return data
 
+res = getPageRes(BASE_URL)
+soup = getSoup(res)
 
 # ratingDivs = getRatingDivs(soup)
 # ratingTexts = getRatings(ratingDivs)
 
+import json
 
-getReviewText(soup)
+def extractScriptInnards(soup, index):
+    """ takes in a soup object and returns the innards of the indexed script """
+
+    # Gets raw json and parse
+    jsonAsString = soup.find_all('script')[index].get_text().strip()
+    loadedJson = json.loads(jsonAsString)
+
+    # extract reviews and return reviews
+    return loadedJson['review']
+
+
+def extractReviewData(review):
+    """ takes in a review object and transforms it into one of the following dict: 
+        'reviewText' : str,
+        'reviewValue' : str,
+        'datePublished' : str,
+    """
+
+    # Extract rel. info
+    reviewText = review['reviewBody']
+    reviewValue = review['reviewRating']['ratingValue']
+    datePublished = review['datePublished']
+
+    return {
+        "reviewText": reviewText,
+        "reviewValue": reviewValue,
+        "datePublished": datePublished
+    }
+
+
+
+
+rawScriptInnard = extractScriptInnards(soup, 8)
+
+print(extractReviewData(rawScriptInnard[0]))
+
+
+# sorted_string = json.dumps(loadedJson, indent=4, sort_keys=False)
+# print(sorted_string)
