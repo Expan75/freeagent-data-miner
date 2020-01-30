@@ -9,6 +9,3 @@ include/
 lib/
 
 # data
-reviews.csv
-
-data/
