@@ -11,14 +11,12 @@ from bs4 import BeautifulSoup
 import pandas as pd
 from requests import get
 
-
 # Relative Imports (util functions)
 from utils import getPageRes, getSoup, saveObjects
 
 # CONSTS
 BASE_URL = 'https://www.reviews.co.uk/company-reviews/store/freeagent'
-# example of page 2
-# # https://www.reviews.co.uk/company-reviews/store/freeagent/1
+# Example of Page 2: https://www.reviews.co.uk/company-reviews/store/freeagent/1
 
 
 def getReviewText(soup):
@@ -47,7 +45,7 @@ def extractReviewData(reviewObject):
         'datePublished' : str,
     """
 
-    # Extract rel. info
+    # Extract rel. info and return it
     reviewText = reviewObject['reviewBody']
     reviewValue = reviewObject['reviewRating']['ratingValue']
     datePublished = reviewObject['datePublished']
