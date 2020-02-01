@@ -19,47 +19,31 @@ BASE_URL = 'https://www.reviews.co.uk/company-reviews/store/freeagent'
 # Example of Page 2: https://www.reviews.co.uk/company-reviews/store/freeagent/1
 
 
-def getReviewText(soup):
-    """ extracts all the script tags within a soup object """
-    # Text is actually wrapped inside a script tag as JSON data
-    data = soup.find_all('script', 'application/ld+json')
-
-    return data
-
-
-def extractScriptInnards(soup, index):
+def extractReviews(soup):
     """ takes in a soup object and returns the innards of the indexed script """
 
     # Gets raw json and parse
-    jsonAsString = soup.find_all('script')[index].get_text().strip()
-    loadedJson = json.loads(jsonAsString)
+    rawReviewData = soup.find_all('script', type="application/ld+json")
+    rawReviewsJson = rawReviewData[0].get_text().strip()
+    decodedReviewsJson = json.loads(rawReviewsJson)
+    rawReviews = decodedReviewsJson['review'] 
 
     # extract reviews and return reviews
-    return loadedJson['review']
+    return list(map(lambda rawReview: extractReviewData(rawReview), rawReviews))
 
 
-def extractReviewData(reviewObject):
-    """ takes in a review object and transforms it into one of the following dict: 
-        'reviewText' : str,
-        'reviewValue' : str,
-        'datePublished' : str,
-    """
+def extractReviewData(rawReviewObject):
+    """ takes in a review object and transforms it into one of the following dict: """
 
-    # Extract rel. info and return it
-    reviewText = reviewObject['reviewBody']
-    reviewValue = reviewObject['reviewRating']['ratingValue']
-    datePublished = reviewObject['datePublished']
-
-    return {
-        "reviewValue": reviewValue,
-        "reviewText": reviewText,
-        "datePublished": datePublished
+    reviewObject = {
+        "rating"          : rawReviewObject["reviewRating"]["ratingValue"],
+        "content"         : rawReviewObject['reviewBody'],
+        "date"            : rawReviewObject["datePublished"],
+        "author"          : rawReviewObject["author"]["name"],
+        "date"            : rawReviewObject["datePublished"]
     }
 
-
-def transformRawReviewData(rawReviewData):
-    """ transforms rawReviewsData into a list of object contianing only rel. info """
-    return list(map(lambda rawObject: extractReviewData(rawObject), rawReviewData))
+    return reviewObject
 
 
 def initDataFlow(maxPageLimit):
@@ -81,8 +65,7 @@ def initDataFlow(maxPageLimit):
         soup = getSoup(res)
 
         # TODO: find a better way than to hardcode index
-        rawReviewData = extractScriptInnards(soup, 8)
-        data = transformRawReviewData(rawReviewData)
+        data = extractReviews(soup)
 
         # save objects and log it
         loggedResults += saveObjects(data, "data/reviews-io-reviews.csv")

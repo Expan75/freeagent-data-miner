@@ -75,7 +75,6 @@ def extractedNestedReviewData(review):
         "content"         : cleanedContent,
         "date"            : review["datePublished"],
         "author"          : review["author"]["name"],
-        "authorProfileUrl": review["author"]["url"],
         "date"            : review["datePublished"]
     }
     return reviewObject
