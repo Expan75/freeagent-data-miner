@@ -1,6 +1,9 @@
 # standard package imports
-import re
 import csv
+import re
+import json
+
+from pprint import pprint
 
 # installed Modules
 from bs4 import BeautifulSoup
@@ -29,8 +32,7 @@ def initDataFlow(paginatedLimit):
             break
 
         soup = getSoup(res)
-        scores, titles, contents = getReviewTagElements(soup)
-        data = assembleReviewObjects(scores,titles,contents)
+        data = extractReviews(soup)
 
         # Handle redirect to frontpage when overstepping pagination (cache the first content)
         if data[0]['content'] == cachedContent:
@@ -56,40 +58,27 @@ def getSoup(res):
     return BeautifulSoup(res.text, 'html.parser')
 
 
-def getReviewTagElements(soup):
-    """ Takes in a beautifulSoup html doc as arg. and returns lists of reviewSCores, reviewTitles, and reviewContents """
-   
-    # Should not include first result as this is merely the page summary
-    reviewScores = soup.find_all(alt=re.compile(r'stars'))
+def extractReviews(soup):
+    rawReviewData = soup.find_all('script', type="application/ld+json")
+    rawReviewsJson = rawReviewData[0].get_text().strip()[:-1]
+    decodedReviewsJson = json.loads(rawReviewsJson)
+    rawReviews = decodedReviewsJson[0]['review'] 
+
+    return list(map(lambda rawReview: extractedNestedReviewData(rawReview), rawReviews))
+
+
+def extractedNestedReviewData(review):
+    cleanedContent = " ".join(review["reviewBody"].split()).replace('"', '')
     
-    # returns all the objects containing the review titles
-    reviewTitles = soup.find_all('a', class_='link link--large link--dark')
-    
-    # returns all the objects containing the review contents
-    reviewContents = soup.find_all('p', class_='review-content__text')
-
-    return reviewScores, reviewTitles, reviewContents
-
-
-def assembleReviewObjects(scores, titles, contents):
-    """ 
-        Takes in arrays with scores, titles, and contents and returns 
-        a list of data objects with the structure:
-            {
-                'score': string,
-                'title': string,
-                'content': string
-            }
-    """
-    data = []
-    for index, score in enumerate(scores[1:], 0):
-        data.append({
-            'score': score['alt'][0],
-            'title': titles[index].text.strip(),
-            'content': contents[index].text.strip()
-        })
-        
-    return data
+    reviewObject = {
+        "rating"          : review["reviewRating"]["ratingValue"],
+        "content"         : cleanedContent,
+        "date"            : review["datePublished"],
+        "author"          : review["author"]["name"],
+        "authorProfileUrl": review["author"]["url"],
+        "date"            : review["datePublished"]
+    }
+    return reviewObject
 
 
 def saveObjects(objects):
@@ -97,11 +86,4 @@ def saveObjects(objects):
     pd.DataFrame(objects).to_csv('data/trustpilot-reviews.csv', mode='a', header=False, index=False, index_label=False)
     print("wrote " + str(len(objects)) + " reviews to file.")
 
-
-
-# Inits data mining flow
-# scores, titles, contents = getReviewTagElements(res)
-# data = assembleReviewObjects(scores,titles,contents)
-# saveObjects(data)
-
-initDataFlow(100)
+initDataFlow(99)
