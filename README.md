@@ -11,8 +11,8 @@ This project aims to serve as a project where multiple data science skills are d
 	<li> Data Wrangling </li>
 	<li> EDA </li>
 	<li> Data Visualisation </li>
-	<li> Sentiment Analysis (ML) </li>
 	<li> EDA with Non-negative Matrix Factorisation (ML)</li>
+	<li> Sentiment Analysis (ML) </li>
 </ul>
 
 
