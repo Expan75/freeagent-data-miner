@@ -1,6 +1,7 @@
 
 # Binaries
 .Python
+__pycache__/
 
 
 # Env
@@ -9,3 +10,6 @@ include/
 lib/
 
 # data
+
+# jupyter
+.ipynb_checkpoints/
