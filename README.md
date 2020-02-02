@@ -18,7 +18,7 @@ This project aims to serve as a project where multiple data science skills are d
 ## Example of what you'll find:
 
 <img src="images/finding1.png" style=height:300px;width:400px>
-We'll look at the possible trends of reviews mined online. What happened in early 2017?
+We'll look at the possible trends of reviews mined online. What happened in early 2018?
 
 
 ## Disclaimer
