@@ -27,7 +27,7 @@ This project aims to serve as a project where multiple data science skills are d
 
 ## Example of what you'll find:
 
-<img src="images/finding1.png" style=max-height:300px;max-width:600;text-align:center;>
+<img src="static/images/finding1.png" style=max-height:300px;max-width:600;text-align:center;>
 
 We'll look at the possible trends of reviews mined online. What happened in early 2018?
 
