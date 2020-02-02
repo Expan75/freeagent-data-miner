@@ -15,6 +15,11 @@ This project aims to serve as a project where multiple data science skills are d
 	<li> Sentiment Analysis (ML) </li>
 </ul>
 
+## Example of what you'll find:
+
+<img src="images/finding1.png">
+We'll look at the possible trends of reviews mined online. What happened in early 2017?
+
 
 ## Disclaimer
 
