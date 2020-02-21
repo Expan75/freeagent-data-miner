@@ -2,7 +2,7 @@
 # Binaries
 .Python
 __pycache__/
-
+scrapers/__pycache__/
 
 # Env
 bin/
@@ -13,3 +13,5 @@ lib/
 
 # jupyter
 .ipynb_checkpoints/
+etc/
+share/
